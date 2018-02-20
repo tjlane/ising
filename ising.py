@@ -25,7 +25,7 @@ def fft_convolve(a, b):
     return np.fft.fftshift(c)
 
 
-def lattice_spatial_correlation(lattices):
+def lattice_spatial_correlation(lattices_a, lattices_b=None):
     """
     Compute the spatial correlation for a series of lattices.
     
@@ -41,12 +41,19 @@ def lattice_spatial_correlation(lattices):
         An array of the same shape as `lattices` with the spatial
         correlation of each lattice.
     """
-    axes = range(1,len(lattices.shape))
-    F = np.fft.fftn(lattices, axes=axes)
-    iF2 = np.fft.ifftn(F * np.conj(F), axes=axes)
+
+    axes = range(1, len(lattices.shape))
+    Fa = np.fft.fftn(lattices_a, axes=axes)
+
+    if lattices_b is None:
+        Fb = Fa
+    else:
+        Fb = np.fft.fftn(lattices_b, axes=axes)
+
+    iF2 = np.fft.ifftn(Fa * np.conj(Fb), axes=axes)
     c = np.abs(np.fft.fftshift(iF2, axes=axes))
     c /= c.max()
-    print c.max()
+
     return c
 
 
@@ -63,6 +70,18 @@ def scatter_lattice(lattice, de=0.5, beam_kernel=None):
     intensity = np.square(np.abs(np.fft.fftshift(np.fft.fftn(x))))
     
     return intensity
+
+
+def radial_average(image, n_bins=101):
+
+    mg_arg = [np.linspace(-x/2., x/2., x) for x in space_acf.shape]
+    mg = np.meshgrid(*mg_arg)
+    r = np.sqrt(np.sum(np.square(mg), axis=0))
+
+    y, x = np.histogram(r, bins=np.linspace(0.0, r.max(), n_bins+1), 
+                        weights=space_acf * np.power(r,-len(space_acf.shape)))
+
+    return x[:-1], y
 
 
 class Model(object):
