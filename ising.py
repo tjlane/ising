@@ -163,14 +163,14 @@ class Model(object):
             new = self.energy
             p = min(1, np.exp(-1.0 * (new-current)))
             if self.verbose:
-                print 'MC step: %.2f %.2f | %.2f' % (current, new, p)
+                print('MC step: %.2f %.2f | %.2f' % (current, new, p))
 
             v = np.random.random()
             if v < p:
-                if self.verbose: print '\t accepted'
+                if self.verbose: print('\t accepted')
                 self.accepted.append(1)
             else:
-                if self.verbose: print '\t rejected'
+                if self.verbose: print('\t rejected')
                 self.lattice = old_lattice
                 self.accepted.append(0)
 
@@ -179,19 +179,22 @@ class Model(object):
 
             if self.save_interval is not None:
                 if (i % self.save_interval == 0):
-                    print 'move %d, saving lattice' % i  
+                    print('move %d, saving lattice' % i)
                     self._saved_lattices.append(self.lattice[None,...])
+                    print(self.lattice[None,...].shape)
 
-        # save other info
-        float_a = tables.Atom.from_dtype(np.dtype(np.float64))
-        int_a   = tables.Atom.from_dtype(np.dtype(np.int64))
+        if self.save_interval is not None:
+            # save other info
+            float_a = tables.Atom.from_dtype(np.dtype(np.float64))
+            int_a   = tables.Atom.from_dtype(np.dtype(np.int64))
 
-        e = self.file.create_carray(self.file.root, 'energies', float_a, shape=(len(self.energies),))
-        e[:] = np.array(self.energies)
-        m = self.file.create_carray(self.file.root, 'mags', float_a, shape=(len(self.mags),))
-        m[:] = np.array(self.mags)
-        a = self.file.create_carray(self.file.root, 'accepted', int_a, shape=(len(self.accepted),))
-        a[:] = np.array(self.accepted)
+            e = self.file.create_carray(self.file.root, 'energies', 
+                                        float_a, shape=(len(self.energies),))
+            e[:] = np.array(self.energies)
+            m = self.file.create_carray(self.file.root, 'mags', float_a, shape=(len(self.mags),))
+            m[:] = np.array(self.mags)
+            a = self.file.create_carray(self.file.root, 'accepted', int_a, shape=(len(self.accepted),))
+            a[:] = np.array(self.accepted)
 
         return
 
@@ -199,9 +202,9 @@ class Model(object):
 if __name__ == '__main__':
     
     m = Model((16,16), 4.0, 100.0)
-    print m.energy
+    print(m.energy)
     m.mc_steps(10)
-    print m.energies
-    print m.mags
+    print(m.energies)
+    print(m.mags)
 
 
