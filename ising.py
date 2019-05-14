@@ -20,7 +20,7 @@ def gaussian_beam_kernel(shape, sigma):
 
 def fft_convolve(a, b):
     fa = np.fft.fftn(a)
-    fb = np.fft.fftn(a)
+    fb = np.fft.fftn(b)
     c = np.abs(np.fft.ifftn(fa * fb))
     return np.fft.fftshift(c)
 
